@@ -30,9 +30,10 @@ func main() {
 }
 
 type config struct {
-	baseURL string
-	port    int
-	db      struct {
+	baseURL     string
+	port        int
+	tokenSecret string
+	db          struct {
 		dsn      string
 		username string
 		password string
@@ -63,6 +64,7 @@ func run(logger *slog.Logger) error {
 
 	cfg.baseURL = env.GetString("BASE_URL", "http://localhost:8081")
 	cfg.port = env.GetInt("PORT", 4000)
+	cfg.tokenSecret = env.GetString("TOKEN_SECRET", "secret")
 
 	cfg.db.username = env.GetString("DB_USERNAME", "postgres")
 	cfg.db.password = env.GetString("DB_PASSWORD", "postgres")
