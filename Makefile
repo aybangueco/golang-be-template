@@ -51,21 +51,21 @@ tidy:
 	go mod tidy -v
 	go fmt ./...
 
-## build: build the cmd/web application
+## build: build the cmd/api application
 .PHONY: build
 build:
-	go build -o=/tmp/bin/web ./cmd/web
+	go build -o=/tmp/bin/api ./cmd/api
 	
-## run: run the cmd/web application
+## run: run the cmd/api application
 .PHONY: run
 run: build
-	/tmp/bin/web
+	/tmp/bin/api
 
 ## run/live: run the application with reloading on file changes
 .PHONY: run/live
 run/live:
 	go run github.com/cosmtrek/air@v1.43.0 \
-		--build.cmd "make build" --build.bin "/tmp/bin/web" --build.delay "100" \
+		--build.cmd "make build" --build.bin "/tmp/bin/api" --build.delay "100" \
 		--build.exclude_dir "" \
 		--build.include_ext "go, tpl, tmpl, html, css, scss, js, ts, sql, jpeg, jpg, gif, png, bmp, svg, webp, ico" \
 		--misc.clean_on_exit "true"
@@ -74,10 +74,10 @@ run/live:
 # SQL MIGRATIONS
 # ==================================================================================== #
 
-## migrations/create migrationName=$1: creates a new migration
+## migrations/create name=$1: creates a new migration
 .PHONY: migrations/create
 migrations/create:
-	goose -s create ${migrationName} sql -dir=sql/schemas
+	goose -s create ${name} sql -dir=sql/schemas
 
 ## migrations/up: apply all up database migrations
 .PHONY: migrations/up
