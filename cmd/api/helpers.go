@@ -5,6 +5,8 @@ import (
 	"net/http"
 )
 
+type envelope map[string]any
+
 func (app *application) newEmailData() map[string]any {
 	data := map[string]any{
 		"BaseURL": app.config.baseURL,

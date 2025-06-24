@@ -4,6 +4,9 @@ import (
 	"log/slog"
 	"net/http"
 	"runtime/debug"
+
+	"github.com/aybangueco/golang-be-template/internal/response"
+	"github.com/aybangueco/golang-be-template/internal/validator"
 )
 
 func (app *application) reportServerError(r *http.Request, err error) {
@@ -22,14 +25,53 @@ func (app *application) serverError(w http.ResponseWriter, r *http.Request, err 
 	app.reportServerError(r, err)
 
 	message := "The server encountered a problem and could not process your request"
-	http.Error(w, message, http.StatusInternalServerError)
+	err = response.JSON(w, http.StatusInternalServerError, envelope{"error": message})
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
 }
 
 func (app *application) notFound(w http.ResponseWriter, r *http.Request) {
 	message := "The requested resource could not be found"
-	http.Error(w, message, http.StatusNotFound)
+
+	err := response.JSON(w, http.StatusNotFound, envelope{"error": message})
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
 }
 
 func (app *application) badRequest(w http.ResponseWriter, r *http.Request, err error) {
-	http.Error(w, err.Error(), http.StatusBadRequest)
+	err = response.JSON(w, http.StatusBadRequest, nil)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+}
+
+func (app *application) customError(w http.ResponseWriter, r *http.Request, message string, status int) {
+	err := response.JSON(w, status, envelope{"error": message})
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+}
+
+func (app *application) validationFailed(w http.ResponseWriter, r *http.Request, v validator.Validator) {
+	err := response.JSON(w, http.StatusUnprocessableEntity, v)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+}
+
+func (app *application) invalidAuthorizationToken(w http.ResponseWriter, r *http.Request) {
+	message := "Invalid authorization token"
+
+	err := response.JSON(w, http.StatusUnauthorized, envelope{"error": message})
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
 }
