@@ -62,14 +62,14 @@ type application struct {
 func run(logger *slog.Logger) error {
 	var cfg config
 
-	cfg.baseURL = env.GetString("BASE_URL", "http://localhost:8081")
+	cfg.baseURL = env.GetString("BASE_URL", "http://localhost:3000")
 	cfg.port = env.GetInt("PORT", 4000)
 	cfg.tokenSecret = env.GetString("TOKEN_SECRET", "secret")
 
 	cfg.db.username = env.GetString("DB_USERNAME", "postgres")
 	cfg.db.password = env.GetString("DB_PASSWORD", "postgres")
 	cfg.db.host = env.GetString("DB_HOST", "localhost")
-	cfg.db.port = env.GetInt("DB_PORT", 4000)
+	cfg.db.port = env.GetInt("DB_PORT", 5432)
 	cfg.db.name = env.GetString("DB_NAME", "default")
 
 	cfg.smtp.username = env.GetString("SMTP_USERNAME", "example_username")
