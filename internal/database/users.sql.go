@@ -13,17 +13,16 @@ import (
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (first_name, last_name, email, password, user_type)
-VALUES ($1, $2, $3, $4, $5)
-RETURNING id, first_name, last_name, email, user_type, created_at, updated_at
+INSERT INTO users (first_name, last_name, email, password)
+VALUES ($1, $2, $3, $4)
+RETURNING id, first_name, last_name, email, created_at, updated_at
 `
 
 type CreateUserParams struct {
-	FirstName string   `json:"first_name"`
-	LastName  string   `json:"last_name"`
-	Email     string   `json:"email"`
-	Password  string   `json:"password"`
-	UserType  UserType `json:"user_type"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
 }
 
 type CreateUserRow struct {
@@ -31,7 +30,6 @@ type CreateUserRow struct {
 	FirstName string           `json:"first_name"`
 	LastName  string           `json:"last_name"`
 	Email     string           `json:"email"`
-	UserType  UserType         `json:"user_type"`
 	CreatedAt pgtype.Timestamp `json:"created_at"`
 	UpdatedAt pgtype.Timestamp `json:"updated_at"`
 }
@@ -42,7 +40,6 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateU
 		arg.LastName,
 		arg.Email,
 		arg.Password,
-		arg.UserType,
 	)
 	var i CreateUserRow
 	err := row.Scan(
@@ -50,7 +47,6 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateU
 		&i.FirstName,
 		&i.LastName,
 		&i.Email,
-		&i.UserType,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -58,7 +54,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateU
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, first_name, last_name, email, password, user_type, created_at, updated_at, version FROM users
+SELECT id, first_name, last_name, email, password, created_at, updated_at, version FROM users
 WHERE email = $1
 `
 
@@ -71,7 +67,6 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.LastName,
 		&i.Email,
 		&i.Password,
-		&i.UserType,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Version,
@@ -80,7 +75,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 }
 
 const getUserById = `-- name: GetUserById :one
-SELECT id, first_name, last_name, email, password, user_type, created_at, updated_at, version FROM users
+SELECT id, first_name, last_name, email, password, created_at, updated_at, version FROM users
 WHERE id = $1
 `
 
@@ -93,7 +88,6 @@ func (q *Queries) GetUserById(ctx context.Context, id uuid.UUID) (User, error) {
 		&i.LastName,
 		&i.Email,
 		&i.Password,
-		&i.UserType,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Version,

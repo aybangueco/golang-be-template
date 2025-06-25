@@ -75,7 +75,6 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 			FirstName: user.FirstName,
 			LastName:  user.LastName,
 			Email:     user.Email,
-			UserType:  user.UserType,
 			CreatedAt: user.CreatedAt,
 			UpdatedAt: user.UpdatedAt,
 		})

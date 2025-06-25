@@ -30,7 +30,6 @@ func (app *application) handlerRegister(w http.ResponseWriter, r *http.Request) 
 		LastName  string `json:"lastName"`
 		Email     string `json:"email"`
 		Password  string `json:"password"`
-		UserType  string `json:"userType"`
 		Validator validator.Validator
 	}
 
@@ -44,7 +43,6 @@ func (app *application) handlerRegister(w http.ResponseWriter, r *http.Request) 
 	input.Validator.CheckField(input.LastName != "", "lastName", "Last name is required")
 	input.Validator.CheckField(input.Email != "", "email", "Email is required")
 	input.Validator.CheckField(input.Password != "", "password", "Password is required")
-	input.Validator.CheckField(input.UserType != "", "userType", "User type is required")
 
 	if input.Validator.HasErrors() {
 		app.validationFailed(w, r, input.Validator)
@@ -76,7 +74,6 @@ func (app *application) handlerRegister(w http.ResponseWriter, r *http.Request) 
 		LastName:  input.LastName,
 		Email:     input.Email,
 		Password:  hashedPassword,
-		UserType:  database.UserType(input.UserType),
 	})
 	if err != nil {
 		app.serverError(w, r, err)
