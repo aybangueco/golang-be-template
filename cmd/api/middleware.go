@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/aybangueco/golang-be-template/internal/database"
 	"github.com/aybangueco/golang-be-template/internal/response"
 	"github.com/aybangueco/golang-be-template/internal/token"
 	"github.com/google/uuid"
@@ -70,14 +69,7 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 			return
 		}
 
-		r = app.contextSetAuthenticatedUser(r, &database.User{
-			ID:        user.ID,
-			FirstName: user.FirstName,
-			LastName:  user.LastName,
-			Email:     user.Email,
-			CreatedAt: user.CreatedAt,
-			UpdatedAt: user.UpdatedAt,
-		})
+		r = app.contextSetAuthenticatedUser(r, &user)
 
 		next.ServeHTTP(w, r)
 	})
