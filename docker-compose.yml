@@ -1,7 +1,7 @@
 services:
   database:
     image: postgres:latest
-    container_name: GYM-OPS-database
+    container_name: golang-be-template-db
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USERNAME}
