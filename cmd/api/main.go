@@ -14,6 +14,7 @@ import (
 	"github.com/aybangueco/golang-be-template/internal/smtp"
 	"github.com/aybangueco/golang-be-template/internal/version"
 	"github.com/jackc/pgx/v5/pgxpool"
+	_ "github.com/joho/godotenv/autoload"
 
 	"github.com/lmittmann/tint"
 )
