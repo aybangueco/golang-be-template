@@ -19,7 +19,7 @@ func GenerateToken(secret, userID string) (string, error) {
 		return "", err
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodES256, TokenClaims{
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, TokenClaims{
 		UserID: userID,
 		RegisteredClaims: &jwt.RegisteredClaims{
 			Issuer:   "golang-be-template",
@@ -40,7 +40,7 @@ func ValidateToken(secret, tokenString string) (*TokenClaims, error) {
 	}
 
 	parsedToken, err := jwt.ParseWithClaims(tokenString, &TokenClaims{}, func(t *jwt.Token) (interface{}, error) {
-		if _, ok := t.Method.(*jwt.SigningMethodECDSA); !ok {
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("unexpected signing method")
 		}
 		return decodedSecret, nil
