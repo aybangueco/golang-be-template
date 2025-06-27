@@ -26,6 +26,7 @@ func (app *application) routes() http.Handler {
 	}))
 
 	mux.Use(app.authenticate)
+	mux.Use(app.rateLimitMiddleware)
 
 	mux.Get("/health", app.health)
 

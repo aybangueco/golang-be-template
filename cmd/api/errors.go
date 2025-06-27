@@ -61,6 +61,16 @@ func (app *application) badRequest(w http.ResponseWriter, r *http.Request, err e
 	}
 }
 
+func (app *application) tooManyRequest(w http.ResponseWriter, r *http.Request) {
+	message := "Too many request"
+
+	err := response.JSON(w, http.StatusTooManyRequests, envelope{"error": message})
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+}
+
 func (app *application) inputValidationFailed(w http.ResponseWriter, r *http.Request, v validator.Validator) {
 	err := response.JSON(w, http.StatusUnprocessableEntity, v)
 	if err != nil {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net"
 	"net/http"
 	"strings"
 
@@ -28,6 +29,24 @@ func (app *application) securityHeaders(next http.Handler) http.Handler {
 		w.Header().Set("Referrer-Policy", "origin-when-cross-origin")
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("X-Frame-Options", "deny")
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (app *application) rateLimitMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ip, _, err := net.SplitHostPort(r.RemoteAddr)
+		if err != nil {
+			http.Error(w, "Invalid IP", http.StatusInternalServerError)
+			return
+		}
+
+		limiter := app.limiter.GetLimiter(ip)
+		if !limiter.Allow() {
+			app.tooManyRequest(w, r)
+			return
+		}
 
 		next.ServeHTTP(w, r)
 	})

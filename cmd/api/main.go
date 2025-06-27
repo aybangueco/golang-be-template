@@ -8,13 +8,16 @@ import (
 	"os"
 	"runtime/debug"
 	"sync"
+	"time"
 
 	"github.com/aybangueco/golang-be-template/internal/database"
 	"github.com/aybangueco/golang-be-template/internal/env"
+	"github.com/aybangueco/golang-be-template/internal/ratelimit"
 	"github.com/aybangueco/golang-be-template/internal/smtp"
 	"github.com/aybangueco/golang-be-template/internal/version"
 	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/joho/godotenv/autoload"
+	"golang.org/x/time/rate"
 
 	"github.com/lmittmann/tint"
 )
@@ -52,12 +55,13 @@ type config struct {
 }
 
 type application struct {
-	config config
-	db     *database.Queries
-	dbpool *pgxpool.Pool
-	logger *slog.Logger
-	mailer *smtp.Mailer
-	wg     sync.WaitGroup
+	config  config
+	db      *database.Queries
+	dbpool  *pgxpool.Pool
+	logger  *slog.Logger
+	mailer  *smtp.Mailer
+	wg      sync.WaitGroup
+	limiter ratelimit.RateLimiter
 }
 
 func run(logger *slog.Logger) error {
@@ -101,11 +105,12 @@ func run(logger *slog.Logger) error {
 	}
 
 	app := &application{
-		config: cfg,
-		db:     database.New(dbpool),
-		dbpool: dbpool,
-		logger: logger,
-		mailer: mailer,
+		config:  cfg,
+		db:      database.New(dbpool),
+		dbpool:  dbpool,
+		logger:  logger,
+		mailer:  mailer,
+		limiter: *ratelimit.NewRateLimiter(rate.Every(time.Minute/5), 5),
 	}
 
 	return app.serveHTTP()
