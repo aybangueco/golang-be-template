@@ -35,7 +35,7 @@ func (app *application) securityHeaders(next http.Handler) http.Handler {
 
 func (app *application) authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		authorization := w.Header().Get("Authorization")
+		authorization := r.Header.Get("Authorization")
 
 		if authorization == "" {
 			app.contextSetAuthenticatedUser(r, nil)
@@ -84,7 +84,7 @@ func (app *application) requireAuthenticated(next http.HandlerFunc) http.Handler
 			return
 		}
 
-		err := response.JSON(w, http.StatusUnauthorized, "")
+		err := response.JSON(w, http.StatusUnauthorized, envelope{"error": "You need to be authenticated to access this resource"})
 		if err != nil {
 			app.serverError(w, r, err)
 			return
