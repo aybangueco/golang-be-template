@@ -9,13 +9,12 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (first_name, last_name, email, password)
 VALUES ($1, $2, $3, $4)
-RETURNING id, first_name, last_name, email, created_at, updated_at
+RETURNING id
 `
 
 type CreateUserParams struct {
@@ -25,32 +24,16 @@ type CreateUserParams struct {
 	Password  string `json:"password"`
 }
 
-type CreateUserRow struct {
-	ID        uuid.UUID        `json:"id"`
-	FirstName string           `json:"first_name"`
-	LastName  string           `json:"last_name"`
-	Email     string           `json:"email"`
-	CreatedAt pgtype.Timestamp `json:"created_at"`
-	UpdatedAt pgtype.Timestamp `json:"updated_at"`
-}
-
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (uuid.UUID, error) {
 	row := q.db.QueryRow(ctx, createUser,
 		arg.FirstName,
 		arg.LastName,
 		arg.Email,
 		arg.Password,
 	)
-	var i CreateUserRow
-	err := row.Scan(
-		&i.ID,
-		&i.FirstName,
-		&i.LastName,
-		&i.Email,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
+	var id uuid.UUID
+	err := row.Scan(&id)
+	return id, err
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one

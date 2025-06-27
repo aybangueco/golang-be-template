@@ -50,8 +50,8 @@ func (app *application) handlerRegister(w http.ResponseWriter, r *http.Request) 
 	}
 
 	_, err = app.db.GetUserByEmail(r.Context(), input.Email)
-	existingEmail := errors.Is(err, sql.ErrNoRows)
-	if err != nil && !existingEmail {
+	nonExistingEmail := errors.Is(err, sql.ErrNoRows)
+	if err != nil && !nonExistingEmail {
 		app.serverError(w, r, err)
 		return
 	}
@@ -62,14 +62,14 @@ func (app *application) handlerRegister(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	input.Validator.CheckField(!existingEmail, "email", "Email is already taken")
+	input.Validator.CheckField(nonExistingEmail, "email", "Email is already taken")
 
 	if input.Validator.HasErrors() {
 		app.validationFailed(w, r, input.Validator)
 		return
 	}
 
-	createdUser, err := app.db.CreateUser(r.Context(), database.CreateUserParams{
+	userID, err := app.db.CreateUser(r.Context(), database.CreateUserParams{
 		FirstName: input.FirstName,
 		LastName:  input.LastName,
 		Email:     input.Email,
@@ -80,7 +80,7 @@ func (app *application) handlerRegister(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	token, err := token.GenerateToken(app.config.tokenSecret, createdUser.ID.String())
+	token, err := token.GenerateToken(app.config.tokenSecret, userID.String())
 	if err != nil {
 		app.serverError(w, r, err)
 		return
