@@ -45,7 +45,7 @@ func (app *application) handlerRegister(w http.ResponseWriter, r *http.Request) 
 	input.Validator.CheckField(input.Password != "", "password", "Password is required")
 
 	if input.Validator.HasErrors() {
-		app.validationFailed(w, r, input.Validator)
+		app.inputValidationFailed(w, r, input.Validator)
 		return
 	}
 
@@ -65,7 +65,7 @@ func (app *application) handlerRegister(w http.ResponseWriter, r *http.Request) 
 	input.Validator.CheckField(nonExistingEmail, "email", "Email is already taken")
 
 	if input.Validator.HasErrors() {
-		app.validationFailed(w, r, input.Validator)
+		app.inputValidationFailed(w, r, input.Validator)
 		return
 	}
 
@@ -110,14 +110,14 @@ func (app *application) handlerLogin(w http.ResponseWriter, r *http.Request) {
 	input.Validator.CheckField(input.Email != "", "email", "Email is required")
 	input.Validator.CheckField(input.Password != "", "password", "Password is required")
 	if input.Validator.HasErrors() {
-		app.validationFailed(w, r, input.Validator)
+		app.inputValidationFailed(w, r, input.Validator)
 		return
 	}
 
 	user, err := app.db.GetUserByEmail(r.Context(), input.Email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			app.customError(w, r, "Invalid email or password", http.StatusBadRequest)
+			app.invalidUserCredentials(w, r)
 			return
 		}
 		app.serverError(w, r, err)
@@ -125,7 +125,7 @@ func (app *application) handlerLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !hashing.IsPasswordValid(user.Password, input.Password) {
-		app.customError(w, r, "Invalid email or password", http.StatusBadRequest)
+		app.invalidUserCredentials(w, r)
 		return
 	}
 

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 	"runtime/debug"
@@ -32,6 +33,16 @@ func (app *application) serverError(w http.ResponseWriter, r *http.Request, err 
 	}
 }
 
+func (app *application) methodNotAllowed(w http.ResponseWriter, r *http.Request) {
+	message := fmt.Sprintf("The requested method %s is not supported for specified resource", r.Method)
+
+	err := response.JSON(w, http.StatusMethodNotAllowed, envelope{"error": message})
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+}
+
 func (app *application) notFound(w http.ResponseWriter, r *http.Request) {
 	message := "The requested resource could not be found"
 
@@ -50,15 +61,7 @@ func (app *application) badRequest(w http.ResponseWriter, r *http.Request, err e
 	}
 }
 
-func (app *application) customError(w http.ResponseWriter, r *http.Request, message string, status int) {
-	err := response.JSON(w, status, envelope{"error": message})
-	if err != nil {
-		app.serverError(w, r, err)
-		return
-	}
-}
-
-func (app *application) validationFailed(w http.ResponseWriter, r *http.Request, v validator.Validator) {
+func (app *application) inputValidationFailed(w http.ResponseWriter, r *http.Request, v validator.Validator) {
 	err := response.JSON(w, http.StatusUnprocessableEntity, v)
 	if err != nil {
 		app.serverError(w, r, err)
@@ -68,6 +71,16 @@ func (app *application) validationFailed(w http.ResponseWriter, r *http.Request,
 
 func (app *application) invalidAuthorizationToken(w http.ResponseWriter, r *http.Request) {
 	message := "Invalid authorization token"
+
+	err := response.JSON(w, http.StatusUnauthorized, envelope{"error": message})
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+}
+
+func (app *application) invalidUserCredentials(w http.ResponseWriter, r *http.Request) {
+	message := "Invalid email or password"
 
 	err := response.JSON(w, http.StatusUnauthorized, envelope{"error": message})
 	if err != nil {

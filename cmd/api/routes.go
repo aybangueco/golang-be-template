@@ -9,6 +9,7 @@ import (
 
 func (app *application) routes() http.Handler {
 	mux := chi.NewRouter()
+	mux.MethodNotAllowed(app.methodNotAllowed)
 	mux.NotFound(app.notFound)
 
 	mux.Use(app.recoverPanic)
