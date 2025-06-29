@@ -24,8 +24,9 @@ EXECUTE FUNCTION moddatetime (updated_at);
 
 -- +goose Down
 -- +goose StatementBegin
-DROP EXTENSION IF EXISTS "moddatetime"
-DROP EXTENSION IF EXISTS "uuid-ossp";
-DROP TABLE IF EXISTS users;
 DROP TRIGGER update_users_updated_at ON users;
+DROP INDEX IF EXISTS idx_users_email;
+DROP TABLE IF EXISTS users;
+DROP EXTENSION IF EXISTS moddatetime;
+DROP EXTENSION IF EXISTS "uuid-ossp";
 -- +goose StatementEnd
