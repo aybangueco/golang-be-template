@@ -7,7 +7,11 @@ import (
 	"github.com/aybangueco/golang-be-template/internal/database"
 )
 
-const userCtxKey = "user"
+type contextKey string
+
+const (
+	userCtxKey contextKey = "user"
+)
 
 func (app *application) contextSetAuthenticatedUser(r *http.Request, user *database.User) *http.Request {
 	ctx := context.WithValue(r.Context(), userCtxKey, user)

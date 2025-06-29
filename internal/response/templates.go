@@ -45,7 +45,10 @@ func NamedTemplateWithHeaders(w http.ResponseWriter, status int, data any, heade
 	}
 
 	w.WriteHeader(status)
-	buf.WriteTo(w)
+	_, err = buf.WriteTo(w)
+	if err != nil {
+		panic(err)
+	}
 
 	return nil
 }

@@ -54,7 +54,7 @@ func (app *application) notFoundResponse(w http.ResponseWriter, r *http.Request)
 }
 
 func (app *application) badRequestResponse(w http.ResponseWriter, r *http.Request, err error) {
-	err = response.JSON(w, http.StatusBadRequest, nil)
+	err = response.JSON(w, http.StatusBadRequest, envelope{"error": err.Error()})
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
