@@ -25,7 +25,7 @@ func JSONWithHeaders(w http.ResponseWriter, status int, data any, headers http.H
 	w.WriteHeader(status)
 	_, err = w.Write(js)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	return nil
