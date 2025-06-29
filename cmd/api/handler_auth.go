@@ -20,7 +20,7 @@ func (app *application) handlerCurrentAuthenticated(w http.ResponseWriter, r *ht
 		"user": user,
 	})
 	if err != nil {
-		app.serverError(w, r, err)
+		app.serverErrorResponse(w, r, err)
 	}
 }
 
@@ -35,7 +35,7 @@ func (app *application) handlerRegister(w http.ResponseWriter, r *http.Request) 
 
 	err := request.DecodeJSON(w, r, &input)
 	if err != nil {
-		app.badRequest(w, r, err)
+		app.badRequestResponse(w, r, err)
 		return
 	}
 
@@ -45,27 +45,27 @@ func (app *application) handlerRegister(w http.ResponseWriter, r *http.Request) 
 	input.Validator.CheckField(input.Password != "", "password", "Password is required")
 
 	if input.Validator.HasErrors() {
-		app.inputValidationFailed(w, r, input.Validator)
+		app.inputValidationFailedResponse(w, r, input.Validator)
 		return
 	}
 
 	_, err = app.db.GetUserByEmail(r.Context(), input.Email)
 	nonExistingEmail := errors.Is(err, sql.ErrNoRows)
 	if err != nil && !nonExistingEmail {
-		app.serverError(w, r, err)
+		app.serverErrorResponse(w, r, err)
 		return
 	}
 
 	hashedPassword, err := hashing.HashPassword(input.Password)
 	if err != nil {
-		app.serverError(w, r, err)
+		app.serverErrorResponse(w, r, err)
 		return
 	}
 
 	input.Validator.CheckField(nonExistingEmail, "email", "Email is already taken")
 
 	if input.Validator.HasErrors() {
-		app.inputValidationFailed(w, r, input.Validator)
+		app.inputValidationFailedResponse(w, r, input.Validator)
 		return
 	}
 
@@ -76,13 +76,13 @@ func (app *application) handlerRegister(w http.ResponseWriter, r *http.Request) 
 		Password:  hashedPassword,
 	})
 	if err != nil {
-		app.serverError(w, r, err)
+		app.serverErrorResponse(w, r, err)
 		return
 	}
 
 	token, err := token.GenerateToken(app.config.tokenSecret, userID.String())
 	if err != nil {
-		app.serverError(w, r, err)
+		app.serverErrorResponse(w, r, err)
 		return
 	}
 
@@ -90,7 +90,7 @@ func (app *application) handlerRegister(w http.ResponseWriter, r *http.Request) 
 		"token": token,
 	})
 	if err != nil {
-		app.serverError(w, r, err)
+		app.serverErrorResponse(w, r, err)
 	}
 }
 
@@ -103,35 +103,35 @@ func (app *application) handlerLogin(w http.ResponseWriter, r *http.Request) {
 
 	err := request.DecodeJSON(w, r, &input)
 	if err != nil {
-		app.badRequest(w, r, err)
+		app.badRequestResponse(w, r, err)
 		return
 	}
 
 	input.Validator.CheckField(input.Email != "", "email", "Email is required")
 	input.Validator.CheckField(input.Password != "", "password", "Password is required")
 	if input.Validator.HasErrors() {
-		app.inputValidationFailed(w, r, input.Validator)
+		app.inputValidationFailedResponse(w, r, input.Validator)
 		return
 	}
 
 	user, err := app.db.GetUserByEmail(r.Context(), input.Email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			app.invalidUserCredentials(w, r)
+			app.invalidUserCredentialsResponse(w, r)
 			return
 		}
-		app.serverError(w, r, err)
+		app.serverErrorResponse(w, r, err)
 		return
 	}
 
 	if !hashing.IsPasswordValid(user.Password, input.Password) {
-		app.invalidUserCredentials(w, r)
+		app.invalidUserCredentialsResponse(w, r)
 		return
 	}
 
 	token, err := token.GenerateToken(app.config.tokenSecret, user.ID.String())
 	if err != nil {
-		app.serverError(w, r, err)
+		app.serverErrorResponse(w, r, err)
 		return
 	}
 
@@ -139,6 +139,6 @@ func (app *application) handlerLogin(w http.ResponseWriter, r *http.Request) {
 		"token": token,
 	})
 	if err != nil {
-		app.serverError(w, r, err)
+		app.serverErrorResponse(w, r, err)
 	}
 }

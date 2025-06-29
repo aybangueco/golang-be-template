@@ -16,7 +16,7 @@ func (app *application) recoverPanic(next http.Handler) http.Handler {
 		defer func() {
 			pv := recover()
 			if pv != nil {
-				app.serverError(w, r, fmt.Errorf("%v", pv))
+				app.serverErrorResponse(w, r, fmt.Errorf("%v", pv))
 			}
 		}()
 
@@ -44,7 +44,7 @@ func (app *application) rateLimitMiddleware(next http.Handler) http.Handler {
 
 		limiter := app.limiter.GetLimiter(ip)
 		if !limiter.Allow() {
-			app.tooManyRequest(w, r)
+			app.tooManyRequestResponse(w, r)
 			return
 		}
 
@@ -64,7 +64,7 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 
 		parts := strings.SplitN(authorization, " ", 2)
 		if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {
-			app.invalidAuthorizationToken(w, r)
+			app.invalidAuthorizationTokenResponse(w, r)
 			return
 		}
 
@@ -72,19 +72,19 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 
 		tokenClaims, err := token.ValidateToken(app.config.tokenSecret, authorizationToken)
 		if err != nil {
-			app.serverError(w, r, err)
+			app.serverErrorResponse(w, r, err)
 			return
 		}
 
 		parsedUserID, err := uuid.Parse(tokenClaims.UserID)
 		if err != nil {
-			app.serverError(w, r, err)
+			app.serverErrorResponse(w, r, err)
 			return
 		}
 
 		user, err := app.db.GetUserById(r.Context(), parsedUserID)
 		if err != nil {
-			app.serverError(w, r, err)
+			app.serverErrorResponse(w, r, err)
 			return
 		}
 
@@ -105,7 +105,7 @@ func (app *application) requireAuthenticated(next http.HandlerFunc) http.Handler
 
 		err := response.JSON(w, http.StatusUnauthorized, envelope{"error": "You need to be authenticated to access this resource"})
 		if err != nil {
-			app.serverError(w, r, err)
+			app.serverErrorResponse(w, r, err)
 			return
 		}
 	})
