@@ -11,11 +11,11 @@ import (
 
 type User struct {
 	ID        uuid.UUID        `json:"id"`
-	FirstName string           `json:"first_name"`
-	LastName  string           `json:"last_name"`
+	FirstName string           `json:"firstName"`
+	LastName  string           `json:"lastName"`
 	Email     string           `json:"email"`
 	Password  string           `json:"password"`
-	CreatedAt pgtype.Timestamp `json:"created_at"`
-	UpdatedAt pgtype.Timestamp `json:"updated_at"`
+	CreatedAt pgtype.Timestamp `json:"createdAt"`
+	UpdatedAt pgtype.Timestamp `json:"updatedAt"`
 	Version   pgtype.Int4      `json:"version"`
 }
