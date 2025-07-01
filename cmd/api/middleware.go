@@ -66,7 +66,7 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 
 		parts := strings.SplitN(authorization, " ", 2)
 		if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {
-			app.invalidAuthorizationTokenResponse(w, r)
+			app.authorizationTokenMissingResponse(w, r)
 			return
 		}
 
