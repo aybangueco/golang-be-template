@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/aybangueco/golang-be-template/internal/response"
 	"github.com/aybangueco/golang-be-template/internal/token"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
 
@@ -72,6 +74,15 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 
 		tokenClaims, err := token.ValidateToken(app.config.tokenSecret, authorizationToken)
 		if err != nil {
+			if errors.Is(err, jwt.ErrTokenMalformed) {
+				app.invalidAuthorizationTokenResponse(w, r)
+				return
+			}
+
+			if errors.Is(err, jwt.ErrTokenExpired) {
+				app.authorizationTokenExpiredResponse(w, r)
+				return
+			}
 			app.serverErrorResponse(w, r, err)
 			return
 		}

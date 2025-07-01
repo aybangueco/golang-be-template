@@ -79,6 +79,26 @@ func (app *application) inputValidationFailedResponse(w http.ResponseWriter, r *
 	}
 }
 
+func (app *application) authorizationTokenMissingResponse(w http.ResponseWriter, r *http.Request) {
+	message := "Authorization token missing"
+
+	err := response.JSON(w, http.StatusUnauthorized, envelope{"error": message})
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+}
+
+func (app *application) authorizationTokenExpiredResponse(w http.ResponseWriter, r *http.Request) {
+	message := "Authorization token expired"
+
+	err := response.JSON(w, http.StatusUnauthorized, envelope{"error": message})
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+}
+
 func (app *application) invalidAuthorizationTokenResponse(w http.ResponseWriter, r *http.Request) {
 	message := "Invalid authorization token"
 
